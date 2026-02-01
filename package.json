@@ -1,0 +1,30 @@
+{
+  "name": "html-fetch-parser",
+  "version": "1.0.0",
+  "description": "Lightweight HTML fetching and parsing library - combines fetch, parsing, and manipulation in one simple package",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "keywords": [
+    "html",
+    "parser",
+    "fetch",
+    "scraper",
+    "cheerio",
+    "axios",
+    "dom",
+    "manipulation"
+  ],
+  "author": "KazeDevID",
+  "license": "MIT",
+  "dependencies": {
+    "node-html-parser": "^6.1.12"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KazeDevID/html-fetch-parser"
+  },
+  "scripts": {
+    "test": "node examples/basic-usage.js"
+  }
+}
