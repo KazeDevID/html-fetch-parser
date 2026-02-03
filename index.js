@@ -1,6 +1,9 @@
 const Fetcher = require('./lib/fetcher');
 const Parser = require('./lib/parser');
 const Manipulator = require('./lib/manipulator');
+const Validator = require('./lib/validator');
+const TableParser = require('./lib/table-parser');
+const FormParser = require('./lib/form-parser');
 
 class HtmlFetchParser {
   constructor(options = {}) {
@@ -82,6 +85,9 @@ module.exports = HtmlFetchParser;
 module.exports.Fetcher = Fetcher;
 module.exports.Parser = Parser;
 module.exports.Manipulator = Manipulator;
+module.exports.Validator = Validator;
+module.exports.TableParser = TableParser;
+module.exports.FormParser = FormParser;
 module.exports.default = HtmlFetchParser;
 
 module.exports.fetch = async (url, options) => {

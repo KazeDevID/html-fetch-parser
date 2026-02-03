@@ -1,15 +1,18 @@
-# HTML Fetch Parser
+# html-fetch-parser
 
-Lightweight and powerful HTML fetching, parsing, and manipulation library for Node.js. Combines the best features of fetch, axios, and cheerio in one simple package.
+A lightweight, powerful library for fetching, parsing, and manipulating HTML content in JavaScript/Node.js. Combines HTTP fetching, HTML parsing, and advanced data extraction in one simple package.
 
 ## Features
 
-- **Easy HTML Fetching** - Built-in HTTP client with timeout support
-- **Powerful Parsing** - CSS selector-based HTML parsing
-- **Simple API** - Intuitive chainable methods
-- **Zero Heavy Dependencies** - Uses lightweight `node-html-parser`
-- **TypeScript Support** - Full TypeScript definitions included
-- **Utility Functions** - HTML manipulation helpers built-in
+- **Lightweight** - Minimal dependencies (only `node-html-parser`)
+- **Easy to Use** - Chainable API with jQuery-like selectors
+- **Powerful Parsing** - Extract data with custom schemas
+- **HTML Manipulation** - Utilities for cleaning, minifying, and transforming HTML
+- **Form Parsing** - Automatically parse forms into structured data
+- **Table Parsing** - Extract and manipulate HTML tables
+- **Validation** - Validate HTML, URLs, emails, and more
+- **Data Extraction** - Built-in methods for links, images, meta tags, and structured data
+- **Security** - Detect malicious content and sanitize data
 
 ## Installation
 
@@ -19,262 +22,398 @@ npm install html-fetch-parser
 
 ## Quick Start
 
-### Fetch and Parse Remote HTML
-
-```javascript
-const { fetch } = require('html-fetch-parser');
-
-const parser = await fetch('https://example.com');
-console.log(parser.getTitle());
-console.log(parser.text('h1'));
-console.log(parser.getLinks());
-```
-
-### Load and Parse Local HTML
-
-```javascript
-const HtmlFetchParser = require('html-fetch-parser');
-
-const html = '<h1>Hello World</h1><p>Welcome</p>';
-const parser = new HtmlFetchParser();
-parser.load(html);
-
-console.log(parser.text('h1'));
-```
-
-## API Reference
-
-### Main Class
-
-#### `new HtmlFetchParser(options)`
-
-Create a new instance.
-
-**Options:**
-- `headers` - Default HTTP headers
-- `timeout` - Request timeout in milliseconds (default: 10000)
-
-#### Methods
-
-**Fetching:**
-- `fetch(url, options)` - Fetch HTML from URL
-- `post(url, data, options)` - POST request
-- `load(html)` - Load HTML string
-
-**Querying:**
-- `$(selector)` - Get single element (alias for querySelector)
-- `$$(selector)` - Get all elements (alias for querySelectorAll)
-- `text(selector)` - Get text content
-- `textAll(selector)` - Get all text contents
-- `attr(selector, attr)` - Get attribute value
-- `attrAll(selector, attr)` - Get all attribute values
-- `html(selector)` - Get inner HTML
-
-**Data Extraction:**
-- `extract(schema)` - Extract data using schema
-- `getTitle()` - Get page title
-- `getMeta(name)` - Get meta tag content
-- `getLinks()` - Get all links
-- `getImages()` - Get all images
-- `getRawHtml()` - Get raw HTML string
-
-### Extract Schema
-
-Extract structured data easily:
-
-```javascript
-const data = parser.extract({
-  title: 'h1',
-  description: '.intro',
-  links: {
-    selector: 'a',
-    attr: 'href',
-    multiple: true
-  },
-  prices: {
-    selector: '.price',
-    multiple: true,
-    transform: (value) => parseFloat(value.replace('$', ''))
-  }
-});
-```
-
-**Schema Options:**
-- `selector` (required) - CSS selector
-- `attr` - Attribute name to extract
-- `multiple` - Extract from all matching elements
-- `transform` - Transform function
-
-### Manipulator Class
-
-Static utility methods for HTML manipulation:
-
-```javascript
-const { Manipulator } = require('html-fetch-parser');
-
-Manipulator.stripTags(html);
-Manipulator.decodeEntities(html);
-Manipulator.extractUrls(html, baseUrl);
-Manipulator.extractEmails(html);
-Manipulator.cleanWhitespace(text);
-Manipulator.truncate(text, length, suffix);
-Manipulator.toAbsoluteUrl(url, baseUrl);
-Manipulator.removeScriptsAndStyles(html);
-Manipulator.wordCount(text);
-Manipulator.sanitizeFilename(filename);
-Manipulator.extractStructuredData(html);
-```
-
-## Examples
-
 ### Basic Usage
 
 ```javascript
 const HtmlFetchParser = require('html-fetch-parser');
 
-const html = `
-  <div>
-    <h1>Products</h1>
-    <div class="product">
-      <h2>Product 1</h2>
-      <span class="price">$19.99</span>
-    </div>
-    <div class="product">
-      <h2>Product 2</h2>
-      <span class="price">$29.99</span>
-    </div>
-  </div>
-`;
+// Fetch and parse in one go
+const parser = await HtmlFetchParser.fetch('https://example.com');
 
-const parser = new HtmlFetchParser();
-parser.load(html);
+// Query elements (jQuery-like)
+const title = parser.text('h1');
+const links = parser.$('a'); // Single element
+const allLinks = parser.$$('a'); // All elements
 
-const products = parser.extract({
+// Get common data
+const pageTitle = parser.getTitle();
+const images = parser.getImages();
+const metadata = parser.extract({
   title: 'h1',
-  products: {
-    selector: '.product h2',
-    multiple: true
-  },
-  prices: {
-    selector: '.price',
-    multiple: true
-  }
+  description: 'meta[name="description"]'
 });
-
-console.log(products);
 ```
 
-### Fetch Remote HTML
+### Load Local HTML
 
 ```javascript
-const { fetch } = require('html-fetch-parser');
+const parser = new HtmlFetchParser();
+parser.load('<html><body><h1>Hello</h1></body></html>');
 
-async function scrapeWebsite() {
-  const parser = await fetch('https://example.com', {
-    headers: {
-      'User-Agent': 'My Scraper Bot'
-    }
-  });
+const heading = parser.text('h1'); // 'Hello'
+```
 
-  const data = parser.extract({
-    title: 'h1',
-    description: 'meta[name="description"]',
-    links: {
-      selector: 'a',
-      attr: 'href',
-      multiple: true
-    }
-  });
+### POST Requests
 
-  return data;
+```javascript
+const parser = await new HtmlFetchParser().post('https://example.com/api', {
+  name: 'John',
+  email: 'john@example.com'
+});
+```
+
+## API Documentation
+
+### HtmlFetchParser (Main Class)
+
+#### Constructor
+```javascript
+const parser = new HtmlFetchParser(options);
+```
+
+**Options:**
+- `headers` (object) - Default HTTP headers
+- `timeout` (number) - Request timeout in ms (default: 10000)
+
+#### Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `fetch(url, options)` | Promise | Fetch and parse HTML from URL |
+| `post(url, data, options)` | Promise | POST request and parse response |
+| `load(html)` | this | Load and parse HTML string |
+| `$(selector)` | Element | Find single element by selector |
+| `$$(selector)` | Array | Find all elements by selector |
+| `text(selector)` | string | Get text content |
+| `textAll(selector)` | Array | Get text from all matching elements |
+| `attr(selector, attr)` | string | Get attribute value |
+| `attrAll(selector, attr)` | Array | Get attributes from all elements |
+| `html(selector)` | string | Get inner HTML |
+| `extract(schema)` | object | Extract data using custom schema |
+| `getTitle()` | string | Get page title |
+| `getMeta(name)` | string | Get meta tag content |
+| `getLinks()` | Array | Get all links with href and text |
+| `getImages()` | Array | Get all images with src and alt |
+| `getRawHtml()` | string | Get raw HTML content |
+
+### Parser Class
+
+Low-level HTML parsing with CSS selectors.
+
+```javascript
+const { Parser } = require('html-fetch-parser');
+const parser = new Parser(html);
+
+parser.querySelector('h1');
+parser.querySelectorAll('p');
+parser.text('h1');
+parser.outerHtml('div');
+```
+
+### Manipulator Class
+
+HTML transformation and data extraction utilities.
+
+```javascript
+const { Manipulator } = require('html-fetch-parser');
+
+// String operations
+Manipulator.stripTags('<p>Hello</p>'); // 'Hello'
+Manipulator.decodeEntities('&lt;div&gt;'); // '<div>'
+Manipulator.minifyHtml(html); // Minified HTML
+Manipulator.prettifyHtml(html, 2); // Prettified HTML
+
+// Data extraction
+Manipulator.extractUrls(html);
+Manipulator.extractEmails(html);
+Manipulator.extractStructuredData(html); // JSON-LD data
+Manipulator.extractSeoMeta(html); // SEO metadata
+
+// Text utilities
+Manipulator.cleanWhitespace(text);
+Manipulator.truncate(text, 100);
+Manipulator.wordCount(text);
+
+// HTML utilities
+Manipulator.removeScriptsAndStyles(html);
+Manipulator.toAbsoluteUrl(relativeUrl, baseUrl);
+Manipulator.sanitizeFilename(filename);
+Manipulator.getHeadingHierarchy(html); // H1, H2, H3 structure
+Manipulator.countElements(html, ['p', 'a', 'img']); // Count specific tags
+```
+
+### Validator Class
+
+Validate HTML, URLs, emails, and detect security issues.
+
+```javascript
+const { Validator } = require('html-fetch-parser');
+
+// URL & Email validation
+Validator.isValidUrl('https://example.com'); // true
+Validator.isValidEmail('john@example.com'); // true
+
+// HTML validation
+Validator.isValidHtml(htmlString); // true
+Validator.isValidSelector('h1.title'); // true
+
+// Security checks
+Validator.hasMaliciousContent(html); // Detects XSS, eval, etc.
+Validator.validateStructure(html); // Check for required tags
+
+// Metadata
+Validator.getMetadata(html); // { size, tags, links, images, forms, scripts, styles, hasMaliciousContent }
+```
+
+### TableParser Class
+
+Parse HTML tables into structured data.
+
+```javascript
+const { TableParser } = require('html-fetch-parser');
+
+// Parse single table or all tables
+const tableData = TableParser.parseTable(tableElement);
+const allTables = TableParser.parseTables(htmlRoot);
+
+// tableData structure:
+// {
+//   headers: ['Name', 'Age', 'City'],
+//   rows: [{ Name: 'John', Age: '28', City: 'NYC' }, ...],
+//   rowCount: 3,
+//   columnCount: 3
+// }
+
+// Convert formats
+TableParser.tableToCSV(tableData); // CSV string
+TableParser.tableToJSON(tableData); // JSON string
+
+// Query operations
+TableParser.search(tableData, 'John', ['Name', 'City']); // Search rows
+TableParser.filter(tableData, row => row.Age > 25); // Filter
+TableParser.sort(tableData, 'Age', 'asc'); // Sort by column
+```
+
+### FormParser Class
+
+Parse HTML forms and validate form data.
+
+```javascript
+const { FormParser } = require('html-fetch-parser');
+
+// Parse single form or all forms
+const formData = FormParser.parseForm(formElement);
+const allForms = FormParser.parseForms(htmlRoot);
+
+// formData structure:
+// {
+//   action: '/submit',
+//   method: 'POST',
+//   fields: [
+//     { name: 'email', type: 'email', required: true, ... },
+//     { name: 'country', type: 'select', options: [...] }
+//   ],
+//   fieldCount: 2
+// }
+
+// Form utilities
+FormParser.getField(formData, 'email'); // Get field config
+FormParser.getRequiredFields(formData); // Required fields only
+FormParser.generateTemplate(formData); // Empty form template
+
+// Validation
+const errors = FormParser.validate(formData, {
+  email: 'john@example.com',
+  country: 'US'
+});
+// Returns: { isValid: true/false, errors: [...] }
+
+// JSON Schema
+FormParser.toJsonSchema(formData); // Generate JSON Schema
+```
+
+## Advanced Examples
+
+### Data Extraction with Schema
+
+```javascript
+const parser = await HtmlFetchParser.fetch('https://example.com');
+
+const data = parser.extract({
+  title: 'h1',
+  description: {
+    selector: 'meta[name="description"]',
+    attr: 'content'
+  },
+  tags: {
+    selector: 'a.tag',
+    multiple: true,
+    transform: tags => tags.map(t => t.toLowerCase())
+  }
+});
+```
+
+### Complex Scraping
+
+```javascript
+const parser = await HtmlFetchParser.fetch('https://example.com');
+const { TableParser, FormParser, Validator } = require('html-fetch-parser');
+
+// Validate page
+if (!Validator.hasMaliciousContent(parser.getRawHtml())) {
+  // Parse tables
+  const tables = TableParser.parseTables(parser.getRawHtml());
+  
+  // Parse forms
+  const forms = FormParser.parseForms(parser.getRawHtml());
+  
+  // Extract all data
+  const result = {
+    title: parser.getTitle(),
+    tables: tables,
+    forms: forms,
+    images: parser.getImages(),
+    links: parser.getLinks()
+  };
 }
 ```
 
-### Custom Fetcher
+### Table Data Processing
 
 ```javascript
-const { Fetcher } = require('html-fetch-parser');
+const { TableParser } = require('html-fetch-parser');
 
-const fetcher = new Fetcher({
-  timeout: 5000,
+const tableData = TableParser.parseTable(tableElement);
+
+// Search
+const results = TableParser.search(tableData, 'New York');
+
+// Sort
+const sorted = TableParser.sort(tableData, 'Age', 'desc');
+
+// Export
+const csv = TableParser.tableToCSV(sorted);
+const json = TableParser.tableToJSON(sorted);
+```
+
+### Form Validation
+
+```javascript
+const { FormParser } = require('html-fetch-parser');
+
+const formData = FormParser.parseForm(formElement);
+const formValues = {
+  email: 'john@example.com',
+  phone: '123456',
+  message: 'Hi'
+};
+
+const validation = FormParser.validate(formData, formValues);
+if (!validation.isValid) {
+  console.log('Errors:', validation.errors);
+  // ['phone must match required pattern', 'message must be at least 10 characters']
+}
+```
+
+### HTML Cleanup and Minification
+
+```javascript
+const { Manipulator } = require('html-fetch-parser');
+
+// Minify HTML
+const minified = Manipulator.minifyHtml(html);
+
+// Remove scripts and styles
+const clean = Manipulator.removeScriptsAndStyles(html);
+
+// Get SEO metadata
+const seo = Manipulator.extractSeoMeta(html);
+console.log(seo.title, seo.description, seo.ogImage);
+```
+
+## Configuration
+
+### Custom Headers
+
+```javascript
+const parser = new HtmlFetchParser({
   headers: {
-    'User-Agent': 'Custom Bot'
-  }
+    'User-Agent': 'My Bot 1.0',
+    'Accept-Language': 'en-US'
+  },
+  timeout: 5000
 });
 
-const html = await fetcher.get('https://example.com');
+const html = await parser.fetch('https://example.com');
 ```
 
-### HTML Manipulation
+### Modify Headers After Creation
 
 ```javascript
-const { Manipulator, load } = require('html-fetch-parser');
-
-const html = '<p>Hello &amp; welcome!</p>';
-
-const clean = Manipulator.decodeEntities(html);
-const text = Manipulator.stripTags(clean);
-const truncated = Manipulator.truncate(text, 10);
-
-console.log(truncated);
+const parser = new HtmlFetchParser();
+parser.fetcher.setHeaders({ 'Authorization': 'Bearer token' });
+parser.fetcher.setTimeout(15000);
 ```
 
-## Advanced Usage
-
-### Chaining Methods
-
-```javascript
-const data = await fetch('https://example.com')
-  .then(parser => parser.extract({
-    title: 'h1',
-    content: '.content'
-  }));
-```
-
-### Error Handling
+## Error Handling
 
 ```javascript
 try {
-  const parser = await fetch('https://example.com');
-  console.log(parser.getTitle());
+  const parser = await HtmlFetchParser.fetch('https://example.com');
 } catch (error) {
-  console.error('Failed to fetch:', error.message);
+  if (error.message.includes('timeout')) {
+    console.log('Request timed out');
+  } else if (error.message.includes('HTTP Error')) {
+    console.log('Server error:', error.message);
+  }
 }
 ```
 
-### Custom Timeout
+## Performance Tips
+
+1. **Use specific selectors** - More specific CSS selectors are faster
+2. **Parse once** - Load HTML once and reuse the parser
+3. **Stream large files** - For very large files, process in chunks
+4. **Cache results** - Store parsed data if fetching multiple times
+
+## Security Considerations
+
+- Always validate user input before using as selectors
+- Use `Validator.hasMaliciousContent()` when parsing untrusted HTML
+- Never execute extracted scripts or styles
+- Sanitize data before rendering or storing
+
+## Browser vs Node.js
+
+This library works in both Node.js and modern browsers. In browsers, it uses the native `fetch` API and DOM parsing.
 
 ```javascript
-const parser = new HtmlFetchParser({ timeout: 30000 });
-await parser.fetch('https://slow-website.com');
+// Browser
+<script src="https://cdn.example.com/html-fetch-parser.js"></script>
+<script>
+  HtmlFetchParser.fetch('/api/data').then(parser => {
+    console.log(parser.getTitle());
+  });
+</script>
 ```
-
-## TypeScript
-
-Full TypeScript support included:
-
-```typescript
-import HtmlFetchParser, { fetch, Manipulator } from 'html-fetch-parser';
-
-const parser: HtmlFetchParser = await fetch('https://example.com');
-const title: string = parser.getTitle();
-```
-
-## Performance
-
-- Lightweight with minimal dependencies
-- Fast HTML parsing using node-html-parser
-- Native fetch API for HTTP requests
-- Memory efficient
-
-## License
-
-MIT
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please submit pull requests or issues on GitHub.
 
-## Support
+## License
 
-For issues and questions, please open an issue on GitHub.
+MIT - See LICENSE file for details
+
+## Changelog
+
+### v1.0.1 (Latest)
+- ✨ Added **Validator** class for HTML/URL/email validation
+- ✨ Added **TableParser** for parsing HTML tables with search, sort, filter
+- ✨ Added **FormParser** for extracting and validating form data
+- 🎨 Enhanced Manipulator with minify, prettify, SEO extraction
+- 📚 Improved documentation and examples
+- 🔒 Added security checks and content validation
+
+### v1.0.0
+- Initial release with Fetcher, Parser, and Manipulator

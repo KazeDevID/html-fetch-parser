@@ -70,6 +70,69 @@ declare module 'html-fetch-parser' {
     static removeScriptsAndStyles(html: string): string;
     static wordCount(text: string): number;
     static sanitizeFilename(filename: string): string;
+    static minifyHtml(html: string): string;
+    static prettifyHtml(html: string, indent?: number): string;
+    static getHeadingHierarchy(html: string): object[];
+    static extractAttributes(html: string, selector?: string): object[];
+    static countElements(html: string, tags?: string[]): object;
+    static extractSeoMeta(html: string): object;
+  }
+
+  export class Validator {
+    static isValidHtml(html: string): boolean;
+    static isValidUrl(url: string): boolean;
+    static isValidEmail(email: string): boolean;
+    static isValidSelector(selector: string): boolean;
+    static hasMaliciousContent(html: string): boolean;
+    static hasRequiredAttributes(element: any, requiredAttrs: string[]): boolean;
+    static validateStructure(html: string): { isValid: boolean; issues: string[] };
+    static getMetadata(html: string): object;
+  }
+
+  export interface TableData {
+    headers: string[];
+    rows: object[];
+    rowCount: number;
+    columnCount: number;
+  }
+
+  export class TableParser {
+    static parseTable(tableElement: any): TableData | null;
+    static parseTables(root: any): TableData[];
+    static tableToCSV(tableData: TableData, delimiter?: string): string;
+    static tableToJSON(tableData: TableData): string;
+    static filterRows(tableData: TableData, predicate: (row: any) => boolean): TableData | null;
+    static search(tableData: TableData, searchTerm: string, columns?: string[]): object[];
+    static sort(tableData: TableData, column: string, order?: 'asc' | 'desc'): TableData | null;
+  }
+
+  export interface FormField {
+    name: string;
+    type: string;
+    value?: string;
+    required?: boolean;
+    placeholder?: string;
+    disabled?: boolean;
+  }
+
+  export interface FormData {
+    action: string;
+    method: string;
+    enctype?: string;
+    id?: string;
+    name?: string;
+    fields: FormField[];
+    fieldCount: number;
+  }
+
+  export class FormParser {
+    static parseForm(formElement: any): FormData | null;
+    static parseForms(root: any): FormData[];
+    static getField(formData: FormData, fieldName: string): FormField | null;
+    static getRequiredFields(formData: FormData): FormField[];
+    static generateTemplate(formData: FormData): object;
+    static validate(formData: FormData, values: any): { isValid: boolean; errors: string[] };
+    static toJsonSchema(formData: FormData): object;
   }
 
   export default class HtmlFetchParser {
@@ -94,4 +157,6 @@ declare module 'html-fetch-parser' {
 
   export function fetch(url: string, options?: FetcherOptions): Promise<HtmlFetchParser>;
   export function load(html: string): HtmlFetchParser;
+
+  ;
 }
